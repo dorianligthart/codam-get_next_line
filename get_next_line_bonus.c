@@ -6,12 +6,11 @@
 /*   By: dligthar <dligthar@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/01/09 16:31:20 by dligthar      #+#    #+#                 */
-/*   Updated: 2023/03/26 14:38:35 by dligthar      ########   odam.nl         */
+/*   Updated: 2023/03/26 15:03:24 by dligthar      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 #include <stdlib.h>
 #include <unistd.h>
