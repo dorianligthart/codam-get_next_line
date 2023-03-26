@@ -1,15 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   get_next_line.c                                    :+:    :+:            */
+/*   get_next_line_bonus.c                              :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: dligthar <dligthar@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/01/09 16:31:20 by dligthar      #+#    #+#                 */
-/*   Updated: 2023/03/26 14:41:21 by dligthar      ########   odam.nl         */
+/*   Updated: 2023/03/26 14:38:35 by dligthar      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdio.h>
 #include "get_next_line.h"
 
 #include <stdlib.h>
@@ -54,7 +55,7 @@ char	*gnl_free_return_null(char *str)
 
 char	*get_next_line(int fd)
 {
-	static char	*arr;
+	static char	*arr[4096] = {NULL}; //char pointer!!
 	char		*buf;
 	char		*tmp;
 	char		c;
@@ -67,16 +68,16 @@ char	*get_next_line(int fd)
 		return (NULL);
 	c = '\n';
 	bytes = 42;
-	while (0 < bytes && !ft_strchr(arr, c))
+	while (0 < bytes && !ft_strchr(arr[fd], c))
 	{
 		bytes = read(fd, buf, BUFFER_SIZE);
 		if (bytes < 0)
 			return (gnl_free_return_null(buf));
 		buf[bytes] = '\0';
-		tmp = ft_strjoin(arr, buf);
-		free(arr);
-		arr = tmp;
+		tmp = ft_strjoin(arr[fd], buf);
+		free(arr[fd]);
+		arr[fd] = tmp;
 	}
 	free(buf);
-	return (gnl_splitnl(&arr, c));
+	return (gnl_splitnl(&arr[fd], c));
 }

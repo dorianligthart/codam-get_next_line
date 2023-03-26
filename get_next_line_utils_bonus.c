@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   get_next_line_utils.c                              :+:    :+:            */
+/*   get_next_line_utils_bonus.c                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: dligthar <dligthar@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/03/19 14:47:48 by dligthar      #+#    #+#                 */
-/*   Updated: 2023/03/26 13:29:03 by dligthar      ########   odam.nl         */
+/*   Updated: 2023/03/26 13:28:55 by dligthar      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ char	*ft_strchr(const char *s, int c)
 	int	i;
 
 	i = 0;
-	if (!s || !s[0])
+	if (!s)
 		return (NULL);
 	while (s[i])
 	{

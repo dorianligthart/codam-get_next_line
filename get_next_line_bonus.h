@@ -1,24 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   get_next_line.h                                    :+:    :+:            */
+/*   get_next_line_bonus.h                              :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: dligthar <dligthar@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2023/01/09 16:31:20 by dligthar      #+#    #+#                 */
-/*   Updated: 2023/03/26 14:41:13 by dligthar      ########   odam.nl         */
+/*   Created: 2023/03/21 18:22:24 by dligthar      #+#    #+#                 */
+/*   Updated: 2023/03/26 14:42:14 by dligthar      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 
 //needed libraries:
 # include <stddef.h>
 
 //default BUFF
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 10
+#  define BUFFER_SIZE 1
 # endif
 
 //libft function:
