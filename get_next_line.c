@@ -1,82 +1,123 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   get_next_line.c                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: dligthar <dligthar@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2023/01/09 16:31:20 by dligthar      #+#    #+#                 */
-/*   Updated: 2023/03/26 15:03:19 by dligthar      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: doligtha <doligtha@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/11/28 22:31:52 by doligtha          #+#    #+#             */
+/*   Updated: 2024/01/23 12:03:08 by doligtha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+// //debug needed by main():
+// #define BUFFER_SIZE 3
+// #include <fcntl.h> //open()
+// #include <stdio.h> //printf()
+
 #include "get_next_line.h"
+#include <stdlib.h> 	//malloc(), free()
+#include <unistd.h>		//read(), main()->close()
 
-#include <stdlib.h>
-#include <unistd.h>
-
-size_t	ft_strlen_chr(const char *s, char c)
+static char	*splitnl(char **prefix, int i, char *result, char *tmp)
 {
-	size_t	i;
+	int	suffix_len;
 
-	i = 0;
-	while (s[i] && s[i] != c)
-		i++;
-	if (s[i] == c)
-		i++;
-	return (i);
+	suffix_len = 0;
+	while (*prefix && (*prefix)[i + suffix_len])
+		suffix_len++;
+	if (suffix_len)
+	{
+		tmp = malloc(suffix_len + 1);
+		if (!tmp)
+			return (free(*prefix), *prefix = NULL, NULL);
+		tmp[suffix_len] = '\0';
+		while (suffix_len--)
+			tmp[suffix_len] = (*prefix)[i + suffix_len];
+	}
+	result = malloc(i + 1);
+	if (!result)
+		return (free(tmp), free(*prefix), *prefix = NULL, NULL);
+	result[i] = '\0';
+	while (i--)
+		result[i] = (*prefix)[i];
+	free(*prefix);
+	*prefix = tmp;
+	return (result);
 }
 
-char	*gnl_splitnl(char **arr, char c)
-{
-	char	*ret;
-	char	*tmp_arr;
-	size_t	split;
-
-	if (!*arr || !*arr[0])
-		return (NULL);
-	split = ft_strlen_chr(*arr, c);
-	ret = ft_substr(*arr, 0, split);
-	if (!ret)
-		return (NULL);
-	tmp_arr = ft_strdup(*arr + split);
-	free(*arr);
-	*arr = tmp_arr;
-	return (ret);
-}
-
-char	*gnl_free_return_null(char *str)
-{
-	if (str || str[0])
-		free(str);
-	return (NULL);
-}
-
+//	returns the next line from file descriptor `fd'.
+//	malloc(BUFFER_SIZE*n^2), where n is the amount of recursion it has to do
+//		resulted from how big the line is, compared to how small BUFFER_SIZE is.
 char	*get_next_line(int fd)
 {
-	static char	*arr;
-	char		*buf;
 	char		*tmp;
-	char		c;
-	int			bytes;
+	static char	*prefix;
+	ssize_t		read_return;
+	int			i;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (NULL);
-	buf = (char *)malloc(BUFFER_SIZE * sizeof(char) + 1);
-	if (!buf)
-		return (NULL);
-	c = '\n';
-	bytes = 42;
-	while (0 < bytes && !ft_strchr(arr, c))
-	{
-		bytes = read(fd, buf, BUFFER_SIZE);
-		if (bytes < 0)
-			return (gnl_free_return_null(buf));
-		buf[bytes] = '\0';
-		tmp = ft_strjoin(arr, buf);
-		free(arr);
-		arr = tmp;
-	}
-	free(buf);
-	return (gnl_splitnl(&arr, c));
+	i = 0;
+	while (prefix && prefix[i])
+		if (prefix[i++] == '\n')
+			return (splitnl(&prefix, i, NULL, NULL));
+	tmp = malloc(i + BUFFER_SIZE + 1);
+	if (!tmp)
+		return (free(prefix), prefix = NULL, NULL);
+	read_return = read(fd, tmp + i, BUFFER_SIZE);
+	if (read_return < 0)
+		return (free(tmp), free(prefix), prefix = NULL, NULL);
+	tmp[i + read_return] = '\0';
+	if (read_return == 0 && (!prefix || !*prefix))
+		return (prefix = NULL, free(tmp), NULL);
+	while (i--)
+		tmp[i] = prefix[i];
+	free(prefix);
+	prefix = tmp;
+	if (read_return == 0)
+		return (prefix = NULL, tmp);
+	return (get_next_line(fd));
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//	GET_NEXT_LINE, read() RETURN HANDLING:
+//
+//  Note that pre always gets copied to tmp.
+//
+//	Possibilities:		  		Case:	 	do:							return:
+//	read_return < 0 && pre;		error: 		pre=NULL, free(pre + tmp),	NULL;
+//	read_return < 0 && !pre;	error: 		pre=NULL, free(tmp), 		NULL;
+//	read_return == 0 && pre;	EOF: 		pre=NULL, free(pre), 		tmp;
+//	read_return == 0 && !pre;	past EOF: 	pre=NULL, free(tmp),		NULL;
+////////////////////////////////////////////////////////////////////////////////
+
+// void	*ft_malloc(size_t size)
+// {
+// 	static int i = 0;
+
+// 	if (i > 3)
+// 		return (NULL);
+// 	i++;
+// 	return (malloc(size));
+// }
+
+// int main(void)
+// {
+// 	int		fd = open("test.txt", O_RDONLY);
+// 	// int		fd = 3;
+// 	// int		fd = 1;
+// 	if (fd < 0)
+// 		return (1);
+// 	char	*hold = NULL;
+
+// 	int i = 0
+// 	hold = get_next_line(fd);
+// 	while (hold || i < 10000)
+// 	{
+// 		printf("%s", hold);
+// 		free(hold);
+// 	 	hold = get_next_line(fd);
+// 		i++;
+// 	}
+// 	close(fd);
+// 	return (0);
+// }
